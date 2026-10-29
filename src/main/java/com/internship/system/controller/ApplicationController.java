@@ -1,8 +1,10 @@
 package com.internship.system.controller;
 
+import java.time.LocalDate;
 import java.util.Optional;
 import java.util.UUID;
 import com.internship.system.domain.Application;
+import com.internship.system.domain.ApplicationStatus;
 import com.internship.system.service.ApplicationService;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.http.HttpStatus;
@@ -14,6 +16,7 @@ import org.springframework.web.bind.annotation.PostMapping;
 import org.springframework.web.bind.annotation.PutMapping;
 import org.springframework.web.bind.annotation.RequestBody;
 import org.springframework.web.bind.annotation.RequestMapping;
+import org.springframework.web.bind.annotation.RequestParam;
 import org.springframework.web.bind.annotation.RestController;
 
 @RestController
@@ -115,6 +118,30 @@ public class ApplicationController {
                     HttpStatus.NOT_FOUND);
         }
 
-        return ResponseEntity.ok(message);
+        return ResponseEntity.ok(
+                message);
     }
+
+    @GetMapping("/by-status")
+    public ResponseEntity<?> getApplicationsByStatus(
+            @RequestParam ApplicationStatus status) {
+
+        return ResponseEntity.ok(
+                applicationService.getApplicationsByStatus(
+                        status));
+    }
+    @GetMapping("/between")
+    public ResponseEntity<?> getApplicationsBetweenDates(
+            @RequestParam String start,
+            @RequestParam String end) {
+
+        LocalDate startDate =
+                LocalDate.parse(start);
+
+        LocalDate endDate =
+                LocalDate.parse(end);
+
+        return ResponseEntity.ok(
+                applicationService.getApplicationsBetweenDates(startDate,endDate));
+        }
 }

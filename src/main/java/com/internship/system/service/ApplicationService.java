@@ -1,9 +1,11 @@
 package com.internship.system.service;
 
+import java.time.LocalDate;
 import java.util.List;
 import java.util.Optional;
 import java.util.UUID;
 import com.internship.system.domain.Application;
+import com.internship.system.domain.ApplicationStatus;
 import com.internship.system.domain.Company;
 import com.internship.system.domain.Student;
 import com.internship.system.repository.ApplicationRepository;
@@ -24,7 +26,6 @@ public class ApplicationService {
     @Autowired
     private CompanyRepository companyRepository;
 
-    // SAVE
     public String saveApplication(Application application) {
 
         if (application.getStudent() == null
@@ -57,32 +58,25 @@ public class ApplicationService {
             return "The company with that id does not exist";
         }
 
-        application.setStudent(
-                student.get());
+        application.setStudent(student.get());
+        application.setCompany(company.get());
 
-        application.setCompany(
-                company.get());
-
-        applicationRepository.save(
-                application);
+        applicationRepository.save(application);
 
         return "Application saved successfully";
     }
 
-    // GET ALL
     public List<Application> getAllApplications() {
 
         return applicationRepository.findAll();
     }
 
-    // GET ONE
     public Optional<Application> getApplicationById(
             UUID id) {
 
         return applicationRepository.findById(id);
     }
 
-    // UPDATE
     public String updateApplication(
             UUID id,
             Application application) {
@@ -107,9 +101,6 @@ public class ApplicationService {
         dbApplication.setCoverLetter(
                 application.getCoverLetter());
 
-        // We do NOT update status here.
-        // Status will later have its own endpoint.
-
         if (application.getStudent() != null
                 && application.getStudent().getId() != null) {
 
@@ -122,8 +113,7 @@ public class ApplicationService {
                 return "The student with that id does not exist";
             }
 
-            dbApplication.setStudent(
-                    student.get());
+            dbApplication.setStudent(student.get());
         }
 
         if (application.getCompany() != null
@@ -138,17 +128,14 @@ public class ApplicationService {
                 return "The company with that id does not exist";
             }
 
-            dbApplication.setCompany(
-                    company.get());
+            dbApplication.setCompany(company.get());
         }
 
-        applicationRepository.save(
-                dbApplication);
+        applicationRepository.save(dbApplication);
 
         return "Application updated successfully";
     }
 
-    // DELETE
     public String deleteApplication(UUID id) {
 
         if (!applicationRepository.existsById(id)) {
@@ -157,6 +144,18 @@ public class ApplicationService {
         }
 
         applicationRepository.deleteById(id);
+
         return "Application deleted successfully";
     }
-}
+
+    public List<Application> getApplicationsByStatus(
+            ApplicationStatus status) {
+
+        return applicationRepository.findByStatusOrderByApplicationDateAsc(status);
+            }
+            public List<Application> getApplicationsBetweenDates(
+                LocalDate start,
+                LocalDate end){
+                    return applicationRepository.findByApplicationDateBetweenOrderByApplicationDateAsc(start, end);
+                }
+        }

@@ -14,6 +14,7 @@ import org.springframework.web.bind.annotation.PostMapping;
 import org.springframework.web.bind.annotation.PutMapping;
 import org.springframework.web.bind.annotation.RequestBody;
 import org.springframework.web.bind.annotation.RequestMapping;
+import org.springframework.web.bind.annotation.RequestParam;
 import org.springframework.web.bind.annotation.RestController;
 
 @RestController
@@ -70,16 +71,12 @@ public class StudentController {
                         id,
                         student);
 
-        if (message.equals(
-                "The student with that id does not exist")) {
+        if (message.equals("The student with that id does not exist")) {
 
-            return new ResponseEntity<>(
-                    message,
-                    HttpStatus.NOT_FOUND);
+            return new ResponseEntity<>(message,HttpStatus.NOT_FOUND);
         }
 
-        return ResponseEntity.ok(
-                message);
+        return ResponseEntity.ok(message);
     }
 
     @DeleteMapping("/delete/{id}")
@@ -92,11 +89,18 @@ public class StudentController {
         if (message.equals(
                 "The student with that id does not exist")) {
 
-            return new ResponseEntity<>(
-                    message,
-                    HttpStatus.NOT_FOUND);
+            return new ResponseEntity<>(message,HttpStatus.NOT_FOUND);
         }
 
         return ResponseEntity.ok(message);
     }
+    @GetMapping("/by-last-name")
+    public ResponseEntity<?> getStudentsByLastName(
+
+        @RequestParam String lastName) {
+
+                return ResponseEntity.ok(
+                 studentService.getStudentsByLastName(lastName));
+                
+                }
 }

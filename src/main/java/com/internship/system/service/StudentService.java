@@ -3,10 +3,12 @@ package com.internship.system.service;
 import java.util.List;
 import java.util.Optional;
 import java.util.UUID;
-import com.internship.system.domain.Student;
-import com.internship.system.repository.StudentRepository;
+
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Service;
+
+import com.internship.system.domain.Student;
+import com.internship.system.repository.StudentRepository;
 
 @Service
 public class StudentService {
@@ -75,6 +77,14 @@ public class StudentService {
         }
 
         studentRepository.deleteById(id);
+
         return "Student deleted successfully";
+    }
+
+    public List<Student> getStudentsByLastName(
+            String lastName) {
+
+        return studentRepository.findByLastNameIgnoreCaseOrderByFirstNameAsc(
+                        lastName);
     }
 }
