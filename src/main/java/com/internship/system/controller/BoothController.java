@@ -98,5 +98,12 @@ public class BoothController {
         }
 
         return ResponseEntity.ok(message);
+}
+       
+        @GetMapping("/free")
+    public ResponseEntity<?> getFreeBooths() {
+
+        return ResponseEntity.ok(
+                boothService.getFreeBooths());
     }
 }

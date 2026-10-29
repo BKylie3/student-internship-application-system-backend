@@ -103,4 +103,18 @@ public class StudentController {
                  studentService.getStudentsByLastName(lastName));
                 
                 }
+                 @GetMapping("/of-company/{companyId}")
+    public ResponseEntity<?> getStudentsOfCompany(
+            @PathVariable UUID companyId) {
+
+        if (!studentService.companyExists(companyId)) {
+
+            return new ResponseEntity<>(
+                    "The company with that id does not exist",
+                    HttpStatus.NOT_FOUND);
+        }
+
+        return ResponseEntity.ok(
+                studentService.getStudentsOfCompany(companyId));
+            }
 }

@@ -58,4 +58,8 @@ public class BoothService {
         boothRepository.deleteById(id);
         return "Booth deleted successfully";
     }
+
+    public List<Booth> getFreeBooths(){
+        return boothRepository.findFreeBooths();
+    }
 }

@@ -155,4 +155,7 @@ public class CompanyService {
 
         return "Company deleted successfully";
     }
+    public List<Company>getCompaniesByField(String name){
+        return companyRepository.findCompaniesByFieldName(name);
+    }
 }

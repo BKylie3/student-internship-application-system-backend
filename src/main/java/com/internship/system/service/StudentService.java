@@ -3,10 +3,9 @@ package com.internship.system.service;
 import java.util.List;
 import java.util.Optional;
 import java.util.UUID;
-
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Service;
-
+import com.internship.system.repository.CompanyRepository;
 import com.internship.system.domain.Student;
 import com.internship.system.repository.StudentRepository;
 
@@ -15,6 +14,9 @@ public class StudentService {
 
     @Autowired
     private StudentRepository studentRepository;
+
+    @Autowired
+private CompanyRepository companyRepository;
 
     public String saveStudent(Student student) {
 
@@ -87,4 +89,15 @@ public class StudentService {
         return studentRepository.findByLastNameIgnoreCaseOrderByFirstNameAsc(
                         lastName);
     }
+    public List<Student> getStudentsOfCompany(
+            UUID companyId) {
+
+        return studentRepository.findStudentsOfCompany(companyId);
+    }
+
+    public boolean companyExists(
+            UUID companyId) {
+
+                return companyRepository.existsById(companyId);
+            }
 }

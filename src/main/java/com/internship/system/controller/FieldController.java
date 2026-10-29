@@ -99,4 +99,8 @@ public class FieldController {
 
         return ResponseEntity.ok(message);
     }
+    @GetMapping ("/unused")
+    public ResponseEntity<?> getUnusedFields(){
+        return ResponseEntity.ok(fieldService.getUnusedFields());
+    }
 }

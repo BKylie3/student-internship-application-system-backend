@@ -54,4 +54,7 @@ public class FieldService {
         fieldRepository.deleteById(id);
         return "Field deleted successfully";
     }
+    public List<Field> getUnusedFields(){
+    return fieldRepository.findUnusedFields();
+    }
 }
