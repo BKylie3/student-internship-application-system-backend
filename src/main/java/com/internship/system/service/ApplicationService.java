@@ -11,8 +11,10 @@ import com.internship.system.domain.Student;
 import com.internship.system.repository.ApplicationRepository;
 import com.internship.system.repository.CompanyRepository;
 import com.internship.system.repository.StudentRepository;
+import com.internship.system.repository.PlacementRepository;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Service;
+import org.springframework.transaction.annotation.Transactional;
 
 @Service
 public class ApplicationService {
@@ -26,7 +28,17 @@ public class ApplicationService {
     @Autowired
     private CompanyRepository companyRepository;
 
+    @Autowired
+    private PlacementRepository placementRepository;
+
     public String saveApplication(Application application) {
+
+        if (application.getApplicationDate() != null
+                && application.getApplicationDate()
+                .isBefore(LocalDate.now())) {
+
+            return "Application date cannot be in the past";
+        }
 
         if (application.getStudent() == null
                 || application.getStudent().getId() == null) {
@@ -58,8 +70,23 @@ public class ApplicationService {
             return "The company with that id does not exist";
         }
 
+        boolean alreadyBooked =
+                applicationRepository
+                .existsByCompanyAndApplicationDateAndStatusNot(
+                        company.get(),
+                        application.getApplicationDate(),
+                        ApplicationStatus.REJECTED);
+
+        if (alreadyBooked) {
+
+            return "Company already interviews an applicant on that date";
+        }
+
         application.setStudent(student.get());
         application.setCompany(company.get());
+
+        application.setStatus(
+                ApplicationStatus.SUBMITTED);
 
         applicationRepository.save(application);
 
@@ -138,24 +165,104 @@ public class ApplicationService {
 
     public String deleteApplication(UUID id) {
 
-        if (!applicationRepository.existsById(id)) {
+    Optional<Application> application =
+            applicationRepository.findById(id);
 
-            return "The application with that id does not exist";
-        }
+    if (application.isEmpty()) {
 
-        applicationRepository.deleteById(id);
-
-        return "Application deleted successfully";
+        return "The application with that id does not exist";
     }
+
+    if (placementRepository.existsByApplication(
+            application.get())) {
+
+        return "That application has placements, delete them first";
+    }
+
+    applicationRepository.deleteById(id);
+
+    return "Application deleted successfully";
+}
 
     public List<Application> getApplicationsByStatus(
             ApplicationStatus status) {
 
-        return applicationRepository.findByStatusOrderByApplicationDateAsc(status);
-            }
-            public List<Application> getApplicationsBetweenDates(
-                LocalDate start,
-                LocalDate end){
-                    return applicationRepository.findByApplicationDateBetweenOrderByApplicationDateAsc(start, end);
-                }
+        return applicationRepository
+                .findByStatusOrderByApplicationDateAsc(
+                        status);
+    }
+
+    public List<Application> getApplicationsBetweenDates(
+            LocalDate start,
+            LocalDate end) {
+
+        return applicationRepository
+                .findByApplicationDateBetweenOrderByApplicationDateAsc(
+                        start,
+                        end);
         }
+        public String updateApplicationStatus(
+        UUID id,
+        ApplicationStatus newStatus) {
+
+    Optional<Application> existingApplication =
+            applicationRepository.findById(id);
+
+    if (existingApplication.isEmpty()) {
+        return "The application with that id does not exist";
+    }
+
+    Application application =
+            existingApplication.get();
+
+    ApplicationStatus currentStatus =
+            application.getStatus();
+
+    boolean validChange = false;
+
+    if (currentStatus == ApplicationStatus.SUBMITTED
+            && (newStatus == ApplicationStatus.SHORTLISTED
+            || newStatus == ApplicationStatus.REJECTED)) {
+
+        validChange = true;
+    }
+
+    if (currentStatus == ApplicationStatus.SHORTLISTED
+            && (newStatus == ApplicationStatus.ACCEPTED
+            || newStatus == ApplicationStatus.REJECTED)) {
+
+        validChange = true;
+    }
+
+    if (!validChange) {
+
+        return "Cannot change status from "
+                + currentStatus
+                + " to "
+                + newStatus;
+    }
+
+    application.setStatus(newStatus);
+
+    applicationRepository.save(application);
+
+    return "Application status updated successfully";
+}
+public List<Object[]> getApplicationStatsByStatus() {
+
+    return applicationRepository
+            .countApplicationsByStatus();
+}
+@Transactional
+public String cancelApplicationsForDay(
+        UUID companyId,
+        LocalDate date) {
+
+    int count =
+            applicationRepository.cancelApplicationsForDay(
+                    companyId,
+                    date);
+
+    return count + " applications cancelled";
+}
+}

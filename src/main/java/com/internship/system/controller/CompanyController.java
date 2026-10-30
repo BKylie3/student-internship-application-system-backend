@@ -9,6 +9,7 @@ import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
 import org.springframework.web.bind.annotation.DeleteMapping;
 import org.springframework.web.bind.annotation.GetMapping;
+import org.springframework.web.bind.annotation.PatchMapping;
 import org.springframework.web.bind.annotation.PathVariable;
 import org.springframework.web.bind.annotation.PostMapping;
 import org.springframework.web.bind.annotation.PutMapping;
@@ -118,5 +119,69 @@ public class CompanyController {
     public ResponseEntity<?> getCompaniesByField(
         @RequestParam String name){
                 return ResponseEntity.ok(companyService.getCompaniesByField(name));
+}
+@PutMapping("/{companyId}/fields/{fieldId}")
+public ResponseEntity<?> addFieldToCompany(
+        @PathVariable UUID companyId,
+        @PathVariable UUID fieldId) {
+
+    String message =
+            companyService.addFieldToCompany(
+                    companyId,
+                    fieldId);
+
+    if (message.equals(
+            "The company with that id does not exist")
+            ||
+            message.equals(
+            "The field with that id does not exist")) {
+
+        return new ResponseEntity<>(
+                message,
+                HttpStatus.NOT_FOUND);
+    }
+
+    if (message.equals(
+            "The company already has that field")) {
+
+        return new ResponseEntity<>(
+                message,
+                HttpStatus.CONFLICT);
+    }
+
+    return ResponseEntity.ok(
+            message);
+}
+@PatchMapping("/{companyId}/booth")
+public ResponseEntity<?> changeCompanyBooth(
+        @PathVariable UUID companyId,
+        @RequestParam int boothNumber) {
+
+    String message =
+            companyService.changeCompanyBooth(
+                    companyId,
+                    boothNumber);
+
+    if (message.equals(
+            "The company with that id does not exist")
+            ||
+            message.equals(
+            "The booth with that boothNumber does not exist")) {
+
+        return new ResponseEntity<>(
+                message,
+                HttpStatus.NOT_FOUND);
+    }
+
+    if (message.equals(
+            "That booth is taken by another company")) {
+
+        return new ResponseEntity<>(
+                message,
+                HttpStatus.CONFLICT);
+    }
+
+    return ResponseEntity.ok(
+            message);
 }
 }

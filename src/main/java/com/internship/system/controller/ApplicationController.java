@@ -18,6 +18,7 @@ import org.springframework.web.bind.annotation.RequestBody;
 import org.springframework.web.bind.annotation.RequestMapping;
 import org.springframework.web.bind.annotation.RequestParam;
 import org.springframework.web.bind.annotation.RestController;
+import org.springframework.web.bind.annotation.PatchMapping;
 
 @RestController
 @RequestMapping("/api/applications")
@@ -27,29 +28,44 @@ public class ApplicationController {
     private ApplicationService applicationService;
 
     @PostMapping("/save")
-    public ResponseEntity<?> saveApplication(
-            @RequestBody Application application) {
+public ResponseEntity<?> saveApplication(
+        @RequestBody Application application) {
 
-        String message =
-                applicationService.saveApplication(
-                        application);
+    String message =
+            applicationService.saveApplication(
+                    application);
 
-        if (message.equals(
-                "The student with that id does not exist")
-                ||
-                message.equals(
-                "The company with that id does not exist")) {
-
-            return new ResponseEntity<>(
-                    message,
-                    HttpStatus.NOT_FOUND);
-        }
+    if (message.equals(
+            "Application date cannot be in the past")) {
 
         return new ResponseEntity<>(
                 message,
-                HttpStatus.CREATED);
+                HttpStatus.BAD_REQUEST);
     }
 
+    if (message.equals(
+            "Company already interviews an applicant on that date")) {
+
+        return new ResponseEntity<>(
+                message,
+                HttpStatus.CONFLICT);
+    }
+
+    if (message.equals(
+            "The student with that id does not exist")
+            ||
+            message.equals(
+            "The company with that id does not exist")) {
+
+        return new ResponseEntity<>(
+                message,
+                HttpStatus.NOT_FOUND);
+    }
+
+    return new ResponseEntity<>(
+            message,
+            HttpStatus.CREATED);
+}
     @GetMapping("/all")
     public ResponseEntity<?> getAllApplications() {
 
@@ -104,34 +120,41 @@ public class ApplicationController {
     }
 
     @DeleteMapping("/delete/{id}")
-    public ResponseEntity<?> deleteApplication(
-            @PathVariable UUID id) {
+        public ResponseEntity<?> deleteApplication(
+        @PathVariable UUID id) {
 
-        String message =
-                applicationService.deleteApplication(id);
+         String message =
+            applicationService.deleteApplication(id);
 
         if (message.equals(
-                "The application with that id does not exist")) {
+            "The application with that id does not exist")) {
 
-            return new ResponseEntity<>(
-                    message,
-                    HttpStatus.NOT_FOUND);
+        return new ResponseEntity<>(
+                message,
+                HttpStatus.NOT_FOUND);
+          }
+
+         if (message.equals(
+            "That application has placements, delete them first")) {
+
+        return new ResponseEntity<>(
+                message,
+                HttpStatus.CONFLICT);
+         }
+
+         return ResponseEntity.ok(
+            message);
         }
-
-        return ResponseEntity.ok(
-                message);
-    }
-
-    @GetMapping("/by-status")
-    public ResponseEntity<?> getApplicationsByStatus(
+         @GetMapping("/by-status")
+        public ResponseEntity<?> getApplicationsByStatus(
             @RequestParam ApplicationStatus status) {
 
         return ResponseEntity.ok(
                 applicationService.getApplicationsByStatus(
                         status));
-    }
-    @GetMapping("/between")
-    public ResponseEntity<?> getApplicationsBetweenDates(
+          }
+         @GetMapping("/between")
+         public ResponseEntity<?> getApplicationsBetweenDates(
             @RequestParam String start,
             @RequestParam String end) {
 
@@ -144,4 +167,55 @@ public class ApplicationController {
         return ResponseEntity.ok(
                 applicationService.getApplicationsBetweenDates(startDate,endDate));
         }
+
+        @PatchMapping("/{id}/status")
+        public ResponseEntity<?> updateApplicationStatus(
+        @PathVariable UUID id,
+        @RequestParam ApplicationStatus status) {
+
+         String message =
+            applicationService.updateApplicationStatus(
+                    id,
+                    status);
+
+         if (message.equals(
+            "The application with that id does not exist")) {
+
+        return new ResponseEntity<>(
+                message,
+                HttpStatus.NOT_FOUND);
+          }
+
+         if (message.startsWith(
+            "Cannot change status from")) {
+
+        return new ResponseEntity<>(
+                message,
+                HttpStatus.BAD_REQUEST);
+        }
+
+          return ResponseEntity.ok(
+            message);
+        }
+        @GetMapping("/stats/by-status")
+    public ResponseEntity<?> getApplicationStatsByStatus() {
+
+    return ResponseEntity.ok(
+            applicationService.getApplicationStatsByStatus());
+}
+@PatchMapping("/cancel-day")
+public ResponseEntity<?> cancelApplicationsForDay(
+        @RequestParam UUID companyId,
+        @RequestParam String date) {
+
+    LocalDate applicationDate =
+            LocalDate.parse(date);
+
+    String message =
+            applicationService.cancelApplicationsForDay(
+                    companyId,
+                    applicationDate);
+
+    return ResponseEntity.ok(message);
+}
 }

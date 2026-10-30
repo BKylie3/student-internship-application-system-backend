@@ -2,6 +2,8 @@ package com.internship.system.repository;
 
 import java.util.List;
 import java.util.UUID;
+
+import com.internship.system.domain.Booth;
 import com.internship.system.domain.Company;
 import org.springframework.data.jpa.repository.JpaRepository;
 import org.springframework.data.jpa.repository.Query;
@@ -20,5 +22,7 @@ public interface CompanyRepository extends JpaRepository<Company, UUID> {
 
   List<Company> findCompaniesByFieldName(
     @Param("name") String name);
+
+    boolean existsByBooth(Booth booth);
 
 }

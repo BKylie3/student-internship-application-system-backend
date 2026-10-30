@@ -158,4 +158,76 @@ public class CompanyService {
     public List<Company>getCompaniesByField(String name){
         return companyRepository.findCompaniesByFieldName(name);
     }
+    public String addFieldToCompany(
+        UUID companyId,
+        UUID fieldId) {
+
+    Optional<Company> company =
+            companyRepository.findById(companyId);
+
+    if (company.isEmpty()) {
+        return "The company with that id does not exist";
+    }
+
+    Optional<Field> field =
+            fieldRepository.findById(fieldId);
+
+    if (field.isEmpty()) {
+        return "The field with that id does not exist";
+    }
+
+    Company dbCompany =
+            company.get();
+
+    Field dbField =
+            field.get();
+
+    if (dbCompany.getFields().contains(dbField)) {
+
+        return "The company already has that field";
+    }
+
+    dbCompany.getFields().add(dbField);
+
+    companyRepository.save(dbCompany);
+
+    return "Field added to the company";
+}
+public String changeCompanyBooth(
+        UUID companyId,
+        int boothNumber) {
+
+    Optional<Company> company =
+            companyRepository.findById(companyId);
+
+    if (company.isEmpty()) {
+        return "The company with that id does not exist";
+    }
+
+    Optional<Booth> booth =
+            boothRepository.findByBoothNumber(boothNumber);
+
+    if (booth.isEmpty()) {
+        return "The booth with that boothNumber does not exist";
+    }
+
+    Booth newBooth =
+            booth.get();
+
+    boolean boothTaken =
+            companyRepository.existsByBooth(newBooth);
+
+    if (boothTaken) {
+        return "That booth is taken by another company";
+    }
+
+    Company dbCompany =
+            company.get();
+
+    dbCompany.setBooth(newBooth);
+
+    companyRepository.save(dbCompany);
+
+    return "Booth changed successfully";
+}
 }

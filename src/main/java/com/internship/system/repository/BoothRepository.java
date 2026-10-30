@@ -1,6 +1,7 @@
 package com.internship.system.repository;
 
 import java.util.List;
+import java.util.Optional;
 import java.util.UUID;
 import com.internship.system.domain.Booth;
 import org.springframework.data.jpa.repository.JpaRepository;
@@ -20,6 +21,11 @@ public interface BoothRepository extends JpaRepository<Booth, UUID> {
             )
             ORDER BY b.boothNumber ASC
             """)
+
             List<Booth> findFreeBooths();
+
+            Optional<Booth> findByBoothNumber(
+                int boothNumber);
+                
             
 }
